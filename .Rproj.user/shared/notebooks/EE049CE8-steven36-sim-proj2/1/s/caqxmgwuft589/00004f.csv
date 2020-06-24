@@ -1,0 +1,2 @@
+"0","#curve(df(x, df1 = p - 1, df2 = n - p), col = ""orange"", add = TRUE)"
+"0","hist(data_mx2[ , 1], breaks = 40)"

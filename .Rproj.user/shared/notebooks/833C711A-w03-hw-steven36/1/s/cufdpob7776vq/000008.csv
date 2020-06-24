@@ -1,0 +1,1 @@
+"0","curve(dnorm(x, mean = mean(b1hats), sd = sqrt(b1_var)), add = TRUE, col = ""orange"", lwd = 2)"

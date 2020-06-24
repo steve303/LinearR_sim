@@ -1,0 +1,5 @@
+"0","Sxx = sum( (x - mean(x))^2 )"
+"0","b1_var = variance/Sxx"
+"0","b0_var = variance * ( 1/n + ((mean(x))^2/Sxx) )"
+"0","df_beta = data.frame(b0_params = c(b0, mean(b0hats), sqrt(b0_var), sd(b0hats)), b1_params = c(b1, mean(b1hats), sqrt(b1_var), sd(b1hats)) )"
+"0","df_beta"

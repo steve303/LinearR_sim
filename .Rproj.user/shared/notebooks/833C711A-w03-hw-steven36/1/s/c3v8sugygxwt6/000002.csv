@@ -1,0 +1,4 @@
+"0","data(Ozone, package = ""mlbench"")"
+"0","Ozone = Ozone[, c(4, 6, 7, 8)]"
+"0","colnames(Ozone) = c(""ozone"", ""wind"", ""humidity"", ""temp"")"
+"0","Ozone = Ozone[complete.cases(Ozone), ]"

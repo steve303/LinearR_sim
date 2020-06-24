@@ -1,0 +1,2 @@
+"0","temp_vec = rf(2000, df1 = p-1, df2 = n-p)"
+"0","hist(temp_vec, breaks = 50, probability = TRUE)"

@@ -1,0 +1,2 @@
+"0","plot(Hwt ~ Bwt, data = cats, main = ""Heart weight vs Body weight"", xlab = ""Body wt - kg"","
+"0","     ylab = ""Heart wt - grams"", col = ""grey"", pch = 20, cex = 1.5, ylim = c(4,22))"

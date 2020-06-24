@@ -1,0 +1,1 @@
+"0","hist(b1hats, prob = TRUE, main = ""Histogram of B1_hat"", xlab = expression(hat(beta)[1]), border = ""red"")"

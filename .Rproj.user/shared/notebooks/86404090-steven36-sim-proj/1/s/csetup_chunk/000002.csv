@@ -1,0 +1,2 @@
+"0","options(scipen = 1, digits = 4, width = 80)"
+"0","opts_chunk$set(cache = TRUE, autodep = TRUE)"

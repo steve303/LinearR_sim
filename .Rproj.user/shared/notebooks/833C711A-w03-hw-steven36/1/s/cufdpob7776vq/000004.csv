@@ -1,0 +1,1 @@
+"0","curve(dnorm(x, mean = mean(b0hats), sd = sqrt(b0_var)), add = TRUE, col = ""blue"", lwd = 2)"

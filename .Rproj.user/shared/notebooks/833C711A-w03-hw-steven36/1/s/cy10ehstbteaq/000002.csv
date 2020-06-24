@@ -1,0 +1,4 @@
+"0","birthday = 19700303"
+"0","set.seed(birthday)"
+"0","n = 50"
+"0","x = seq(0, 10, length = n)"

@@ -1,0 +1,2 @@
+"0","#hist(""a"" = data_mx1[ ,1], ""b"" = data_mx2[ , 1], ""c"" = data_mx3[ , 1])"
+"0","hist(data_mx1[ , 1], breaks = 40, prob = TRUE)"

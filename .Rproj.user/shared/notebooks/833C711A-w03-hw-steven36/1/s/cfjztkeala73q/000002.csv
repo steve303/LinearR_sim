@@ -1,0 +1,3 @@
+"0","xvals = seq(min(cats$Bwt), max(cats$Bwt), .10) "
+"0","ci = predict(cat_model, newdata = data.frame(Bwt = xvals), interval = ""confidence"", level = 0.95 )"
+"0","pi = predict(cat_model, newdata = data.frame(Bwt = xvals), interval = ""prediction"", level = 0.95 )"

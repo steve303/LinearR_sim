@@ -1,0 +1,2 @@
+"0","par(mfrow = c(1,2))"
+"0","hist(b0hats, prob = TRUE, main = ""Histogram of B0_hat"", xlab = expression(hat(beta)[0]), border = ""magenta"")"
