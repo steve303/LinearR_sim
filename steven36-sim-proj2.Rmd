@@ -18,41 +18,7 @@ library(knitr)
 opts_chunk$set(cache = TRUE, autodep = TRUE)
 ```
 
-# Directions
 
-This is an **individual** project. This is NOT like a homework assignment. This is NOT an assignment where collaboration is permissible. Discussion of question intent, coding problems/issues, and project administration may be discussed on the message board on a limited basis. However, sharing, copying, or providing any part of this project to another student is an infraction of the University’s rules on academic integrity. Any violation will be punished as severely as possible.
-
-- Your project must be submitted through Coursera. You are required to upload one `.zip` file, named `yourNetID-sim-proj.zip`, which contains:
-  + Your RMarkdown file which should be saved as `yourNetID-sim-proj.Rmd`.
-  + The result of knitting your RMarkdown file as `yourNetID-sim-proj.html`.
-  + Any outside data provided as a `.csv` file. (In this case, `study_1.csv` and `study_2.csv`.)
-- Your `.Rmd` file should be written such that, when stored in a folder with any data you are asked to import, it will knit properly without modification. If your `.zip` file is organized properly, this should not be an issue.
-- Include your name and NetID in the final document, not only in your filenames.
-
-This project consists of **three** simulation studies. Unlike a homework assignment, these "exercises" are not broken down into parts (e.g., a, b, c), and so your analysis will not be similarly partitioned. Instead, your document should be organized more like a true project report, and it should use the overall format:
-
-- Simulation Study 1
-- Simulation Study 2
-- Simulation Study 3
-
-Within each of the simulation studies, you should use the format:
-
-- Introduction
-- Methods
-- Results
-- Discussion
-
-The **introduction** section should relay what you are attempting to accomplish. It should provide enough background to your work such that a reader would not need this directions document to understand what you are doing. (Basically, assume the reader is mostly familiar with the concepts from the course, but not this project.)
-
-The **methods** section should contain the majority of your “work.” This section will contain the bulk of the `R` code that is used to generate the results. Your `R` code is not expected to be perfect idiomatic `R`, but it is expected to be understood by a reader without too much effort. Use RMarkdown and code comments to your advantage to explain your code if needed.
-
-The **results** section should contain numerical or graphical summaries of your results as they pertain to the goal of each study.
-
-The **discussion** section should contain discussion of your results. The discussion section should contain discussion of your results. Potential topics for discussion are suggested at the end of each simulation study section, but they are not meant to be an exhaustive list. These simulation studies are meant to be explorations into the principles of statistical modeling, so do not limit your responses to short, closed form answers as you do in homework assignments. Use the potential discussion questions as a starting point for your response.
-
-- Your resulting `.html` file will be considered a self-contained “report,” which is the material that will determine the majority of your grade. Be sure to visibly include all `R` code and output that is *relevant*. (You should not include irrelevant code you tried that resulted in error or did not answer the question correctly.)
-- Grading will be based on a combination of completing the required tasks, discussion of results, `R` usage, RMarkdown usage, and neatness and organization. For full details see the provided rubric.
-- At the beginning of *each* of the three simulation studies, set a seed equal to your birthday, as is done on homework. (It should be the first code run for each study.) These should be the only three times you set a seed.
 
 ```{r}
 birthday = 030370
@@ -116,13 +82,13 @@ Potential discussions:
 Additional things to consider:
 
 - Organize the plots in a grid for easy comparison.
-```{r}
+```{r, eval=FALSE}
 n = 25
 p = 4 #no. of parameters
 dfx = read.csv("study_1.csv")
 B = c(3,1,1,1)
 X = as.matrix(cbind("x0" = rep(1, n), dfx[ ,2:ncol(dfx)]))
-S = c(1, sqrt(5), sqrt(10))  
+S = c(1, 5, 10)  
 
 get_Anova = function(n, B, X, sigma, df) {
   noise = rnorm(n, mean = 0, sd = sigma)   
@@ -150,6 +116,15 @@ for (i in 1:2000) {
 ```
 
 ```{r}
+
+n = 25
+p = 4 #no. of parameters
+dfx = read.csv("study_1.csv")
+X_pred = as.matrix(cbind("x0" = rep(1, n), dfx[ ,2:ncol(dfx)]))
+S = c(1, 5, 10)  
+
+#function input: n = #obs, B = beta vector, X = predictor matrix w leading 1s, sigma = stdev, df = dataframe of x(pred) and y values
+#function output: a vector of F stat, p-value, Rsquared 
 get_vals = function(n, B, X, sigma, df) {
   noise = rnorm(n, mean = 0, sd = sigma)   
   y = X %*% B + noise
@@ -161,27 +136,96 @@ get_vals = function(n, B, X, sigma, df) {
   vec = c(f[1], p, rsq)
   as.vector(vec)
 }
+#matrices to store data of sig and non-sig model
+vals0 = matrix(0, 2000, 9)  #non-sig model
+vals1 = matrix(0, 2000, 9)  #sig model
 
-vals0 = matrix(0, 2000, 9)
-vals1 = matrix(0, 2000, 9)
+#loops to simulate model 2000 times for 3 different noise levels
 k=0
 for (i in 1:3) {
   a = i+k
   b = i+k+2
   for (j in 1:2000) {
-    vals1[ j, a : b] = get_vals(n, B = c(3,1,1,1), X, S[i], dfx)
-    vals0[ j, a : b] = get_vals(n, B = c(3,0,0,0), X, S[i], dfx)
+    vals1[ j, a : b] = get_vals(n, B = c(3,1,1,1), X_pred, S[i], dfx)
+    vals0[ j, a : b] = get_vals(n, B = c(3,0,0,0), X_pred, S[i], dfx)
   }
   k=k+2
 }
-
-
-mean(vals1[ ,1])
-mean(vals1[ ,2])
-mean(vals1[ ,3])
 ```
 
 ```{r}
+#pval
+par(mfrow = c(1,3))
+hist(vals1[ , 2], breaks = 30)
+hist(vals1[ , 5], breaks = 30)
+hist(vals1[ , 8], breaks = 30)
+
+c(mean(vals1[ ,2]), mean(vals1[ ,5]), mean(vals1[ ,8]))
+  
+```
+
+
+```{r}
+#Fstat
+par(mfrow = c(1,3))
+hist(vals1[ , 1], breaks = 30)
+hist(vals1[ , 4], breaks = 30)
+hist(vals1[ , 7], breaks = 30)
+
+c(mean(vals1[ ,1]), mean(vals1[ ,4]), mean(vals1[ ,7]))
+
+
+```
+
+```{r}
+#Rsq
+par(mfrow = c(1,3))
+hist(vals1[ , 3], breaks = 30)
+hist(vals1[ , 6], breaks = 30)
+hist(vals1[ , 9], breaks = 30)
+
+c(mean(vals1[ ,3]), mean(vals1[ ,6]), mean(vals1[ ,9]))
+
+
+```
+
+```{r}
+#Fstat
+
+par(mfrow = c(1,3))
+hist(vals0[ , 1], breaks = 30)
+hist(vals0[ , 4], breaks = 30)
+hist(vals0[ , 7], breaks = 30)
+
+c(mean(vals0[ ,1]), mean(vals0[ ,4]), mean(vals0[ ,7]))
+```
+
+
+```{r}
+#pval
+
+par(mfrow = c(1,3))
+hist(vals0[ , 2], breaks = 30)
+hist(vals0[ , 5], breaks = 30)
+hist(vals0[ , 8], breaks = 30)
+
+c(mean(vals0[ ,2]), mean(vals0[ ,5]), mean(vals0[ ,8]))
+```
+
+```{r}
+#Rsq
+
+par(mfrow = c(1,3))
+hist(vals0[ , 3], breaks = 30)
+hist(vals0[ , 6], breaks = 30)
+hist(vals0[ , 9], breaks = 30)
+
+c(mean(vals0[ ,3]), mean(vals0[ ,6]), mean(vals0[ ,9]))
+```
+
+
+
+```{r, eval=FALSE}
 #hist("a" = data_mx1[ ,1], "b" = data_mx2[ , 1], "c" = data_mx3[ , 1])
 
 hist(data_mx1[ , 1], breaks = 40, prob = TRUE)
@@ -190,12 +234,12 @@ hist(data_mx2[ , 1], breaks = 40)
 hist(data_mx3[ , 1], breaks = 40)
 ```
 
-```{r}
+```{r, eval=FALSE}
 hist(data_mx1[ , 2], breaks = 30)
 hist(data_mx2[ , 2], breaks = 30)
 hist(data_mx3[ , 2], breaks = 30)
 ```
-```{r}
+```{r, eval=FALSE}
 hist(data_mx1[ , 3], breaks = 30)
 hist(data_mx2[ , 3], breaks = 30)
 hist(data_mx3[ , 3], breaks = 30)
@@ -203,20 +247,18 @@ hist(data_mx3[ , 3], breaks = 30)
 
 
 
-```{r}
+```{r, eval=FALSE}
 temp_vec = rf(2000, df1 = p-1, df2 = n-p)
 hist(temp_vec, breaks = 50, probability = TRUE)
 curve(df(x, df1 = p-1, df2 = n-p), add = TRUE )
 
 ```
 
-```{r}
+```{r, eval=FALSE}
 range(data_mx1[ ,2])
 range(data_mx2[ ,2])
 range(data_mx3[ ,2])
-```
 
-```{r}
 mean(data_mx1[ ,2])
 mean(data_mx2[ ,2])
 mean(data_mx3[ ,2])
@@ -225,7 +267,7 @@ mean(data_mx3[ ,2])
 
 ### Introduction study one:
 
-The purpose of this study is to examine the role of noise as a function of the F statistic, and p-value in the context of determining the significance of the regression model.  The regression model has 3 predictors. As a result, the null hypothesis is, $H_0:  \beta_1 = \beta_2 = \beta_3 = 0$ and the alternate hypothesis is, $H_1: at\ least\ one\ \beta_1, \beta_2, \beta_3 \ne 0$.  Furthmore, $R^2$, will also be calculated to determine its ... as a function of noise.      
+One of the goals of this study is to examine the role of noise as a function of the F statistic and p-value in the context of determining the significance of the regression model.  The regression model has 3 predictors, and this study examines two different sets of beta parameters. The null hypothesis is, $H_0:  \beta_1 = \beta_2 = \beta_3 = 0$ and the alternate hypothesis is, $H_1: at\ least\ one\ \beta_1, \beta_2, \beta_3 \ne 0$.  Furthmore, $R^2$, will also be calculated to determine its effect as a function of noise.      
 
 ### Methods
 
@@ -233,12 +275,19 @@ To carry out this study, we defined a true linear model where the beta parameter
 
   $Y_i = \beta_0 + \beta_1 x_{i1} + \beta_2 x_{i2} + \beta_3 x_{i3} + \epsilon_i$ 
   
-  where $\epsilon_i \sim N(0, \sigma^2)$ and
-
+  where $\epsilon_i \sim N(0, \sigma^2)$ and the two sets of beta parameters are,
+  
+Significant Model:
 - $\beta_0 = 3$,
 - $\beta_1 = 1$,
 - $\beta_2 = 1$,
-- $\beta_3 = 1$.
+- $\beta_3 = 1$, 
+
+Non-Significant Model:
+- $\beta_0 = 3$,
+- $\beta_1 = 0$,
+- $\beta_2 = 0$,
+- $\beta_3 = 0$.
 
 To obtain empirical data we performed simulations using the true model and added noise to it.  The amount of noise was varied by $\sigma \in (1, 5, 10)$.  The x values, predictors, were fixed and obtained from study_1.csv file.  A function called get_Anova() was created to obtain the F statistic, p-value, and $R^2$ value.  It inputs the beta vector, X input matrix, and noise level as parameters and creates both the null and full model using the lm() function.  The anova() function was used to calculate the F statistic and p-value from these two models.  This was performed 2000 times for each noise level.  
 
@@ -246,7 +295,15 @@ To obtain empirical data we performed simulations using the true model and added
 
 ### Discussion
 
-As noise increases the significance of regression decreases.  This is supported by the decrease in the F statistic and increase in the p-value as noise increases.  When noise level is at its lowest, sigma = 1, the p-value is extremely low. The mean is < 1e-7.  This tells us that we should reject the null hypothesis and that at least one of the predictors has a linear relationship with y when all three predictors, x1, x2, and x3 are included in the analysis.  At noise levels $\sigma = \sqrt{5}\ and\ \sqrt{10}$ the mean p-values are 0.008 and 0.06, respectively.  A greater portion of the simulation values are starting to fail to reject the null hypothesis if we set the criteria to $\alpha = 0.05$.  
+
+In the significant model (beta parameters are non-zero), as noise increased the significance of regression decreased.  This is supported by the decrease in the F statistic and increase in the p-value as noise increases, as shown in the histograms.  When noise level is at its lowest, sigma = 1, the p-value is extremely low. The mean is < 1e-6.  This tells us that we should reject the null hypothesis and that at least one of the predictors has a linear relationship with y when all three predictors, x1, x2, and x3 are included in the analysis.  We should expect this because the true model has non-zero beta parameters.  At noise levels $\sigma = \sqrt{5}\ and\ \sqrt{10}$ the mean p-values are 0.008 and 0.06, respectively.  Assuming we set the probability criteria to $\alpha = 0.05$, a greater portion of the simulation values are starting to fail to reject the null hypothesis due to increased noise level.  
+
+We should expect this since noise increases the spread of y.  This can affect the F statistic by reducing the SSReg.  The increased noise will cause a worse regression fit thereby reducing the SSReg value.  The SSE can also be affected by a larger spread causing the error to increase.  The combined effects will reduce the F statistic which is given by F = SSReg/SSE.  A smaller F statistic will in turn result in a high p-value given by the F distribution with df1 = p-1 and df2 = n-p.    
+
+SSE (sum of squares error).  As SSE increases the F statistic decreases which can be shown by F = SSReg/SSE. The Rsquared values collected in this study also supports the summary above.  As noise increases the Rsquared value decreases which translates to less of the variation in y can be explained by the regression model.  This can be seen in the histogram plots.  Mathematically speaking, as noise increases SSE also increases which decreases Rsquared since Rsquared = 1 - SSE/SST.     
+
+If we look at the non-significant model where all beta parameters are zero (excluding beta intercept),  we notice that most of the time we fail to reject the null hypothesis, as should be the case since the non-intercept beta values are all zero in the true model.  On average, the F statistic was 1.1 and the p-value was 0.5.  The Rsquared value was quite low at 0.12. Another thing to note, in contrast to the significant model, the mean values of the F statistic, p-value and Rsquared values were little affected by the noise level.  The explaination is that there was no significance in the regression model to start with...The response is essentially predicted by the mean of y regardless the of x values.  
+
 
 # Simulation Study 2: Using RMSE for Selection?
 
@@ -303,6 +360,118 @@ Potential discussions:
 
 - Does the method **always** select the correct model? On average, does is select the correct model?
 - How does the level of noise affect the results?
+
+```{r}
+study2 = read.csv("study_2.csv")
+#this function splits and shuffles the study2 dframe, trn and tst dframe stored in a list
+train_test = function(df, ratio) {
+  n = nrow(df)
+  ncols = ncol(df)
+  n_train = n * ratio
+  #mx = as.matrix(df)
+  shuffle_index = sample(1:n, n)
+  train = data.frame(matrix(0, n_train, ncols))
+  colnames(train) = c("y", "x1", "x2", "x3", "x4", "x5", "x6", "x7", "x8", "x9")
+  test = data.frame(matrix(0, n - n_train, ncols))
+  colnames(test) = c("y", "x1", "x2", "x3", "x4", "x5", "x6", "x7", "x8", "x9")
+  for (i in 1:n_train) {
+    indx = shuffle_index[i]
+    train[i,] = df[indx, ]
+  }
+  for (i in 1 : n - n_train) {
+    indx = shuffle_index[n_train + i]
+    test[i, ] = df[indx, ]
+  }
+  list(train, test)
+}
+
+```
+
+```{r}
+
+B = c(0, 3, -4, 1.6, -1.1, 0.7, 0.5)
+S = c(1, 2, 4)  
+
+#function input: n = #obs, B = beta vector, X = predictor matrix w leading 1s, sigma = stdev, df = dataframe of x(pred) and y values
+#function output: a vector of F stat, p-value, Rsquared 
+get_rmse = function(B, sigma, df, ratio) {
+  n = nrow(df)
+  X = as.matrix(cbind("x0" = rep(1, n), df[ ,2:7])) #this is for true model, only betas x0-x6 required
+  noise = rnorm(n, mean = 0, sd = sigma)   
+  y = X %*% B + noise
+  df[ , 1] = as.vector(y)
+  temp = train_test(df, ratio)  
+  trn = temp[[1]] #this is a data frame
+  tst = temp[[2]]
+  n_trn = nrow(trn)  #n_train in this case is 250 
+  n_tst = nrow(tst)
+  m1 = lm(y ~ x1, data = trn)
+  m2 = lm(y ~ x1 + x2, data = trn)
+  m3 = lm(y ~ x1 + x2 + x3, data = trn)  
+  m4 = lm(y ~ x1 + x2 + x3 + x4, data = trn)  
+  m5 = lm(y ~ x1 + x2 + x3 + x4 + x5, data = trn)  
+  m6 = lm(y ~ x1 + x2 + x3 + x4 + x5 + x6, data = trn)  
+  m7 = lm(y ~ x1 + x2 + x3 + x4 + x5 + x6 + x7, data = trn)  
+  m8 = lm(y ~ x1 + x2 + x3 + x4 + x5 + x6 + x7 + x8, data = trn)  
+  m9 = lm(y ~ x1 + x2 + x3 + x4 + x5 + x6 + x7 + x8 + x9, data = trn)  
+  models = list(m1, m2, m3, m4, m5, m6, m7, m8, m9)
+  rmse_train = rep(0, length(models))
+  rmse_test = rep(0, length(models))
+  for (i in 1:length(models))  {
+    err = resid(models[[i]])
+    rmse_trn = sqrt(sum(err^2)/n_trn) 
+    yhat = predict(models[[i]], newdata = tst)
+    e = yhat - tst[ , 1]
+    rmse_tst = sqrt(sum(e^2)/n_tst)
+    rmse_train[i] = rmse_trn
+    rmse_test[i] = rmse_tst
+  } 
+  list(rmse_train, rmse_test)
+}
+
+```
+
+
+```{r}
+performSim = function(B, sigma, df, ratio, n_sim, n_model) {
+  n_column = n_model * 2
+  n_modelp1 = n_model + 1
+  data = matrix(0, n_sim, n_column)
+  for (i in 1:n_sim) {
+    temp = get_rmse(B, sigma, df, ratio)
+    data[i, 1:n_model] = temp[[1]]
+    data[i, n_modelp1:n_column] = temp[[2]]
+  }
+  data
+}
+```
+
+```{r, eval=TRUE}
+data_sig1 = performSim(B, sigma = S[1], df = study2, ratio = 0.5, n_sim = 1000, n_model = 9)
+data_sig2 = performSim(B, sigma = S[2], df = study2, ratio = 0.5, n_sim = 1000, n_model = 9)
+data_sig3 = performSim(B, sigma = S[3], df = study2, ratio = 0.5, n_sim = 1000, n_model = 9)
+```
+
+```{r}
+par(mfrow = c(1,2))
+boxplot(data_sig1[, 1:9])
+boxplot(data_sig1[ , 10:18])
+```
+
+```{r}
+par(mfrow = c(1,2))
+boxplot(data_sig2[, 1:9])
+boxplot(data_sig2[ , 10:18])
+```
+
+```{r}
+par(mfrow = c(1,2))
+boxplot(data_sig3[, 1:9])
+boxplot(data_sig3[ , 10:18])
+```
+
+
+
 
 
 # Simulation Study 3: Power
@@ -376,3 +545,62 @@ Potential discussions:
 
 - How do $n$, $\beta_1$, and $\sigma$ affect power? Consider additional plots to demonstrate these effects.
 - Are $1000$ simulations sufficient?
+
+```{r}
+set.seed(10)
+
+beta = seq(-2, 2, .1)
+
+S = c(1, 2, 4)  
+
+#function input: n = #obs, B = beta vector, X = predictor matrix w leading 1s, sigma = stdev, df = dataframe of x(pred) and y values
+#function output: a vector of F stat, p-value, Rsquared
+
+get_pval = function(n, B, sigma) {
+  x_values = seq(0, 5, length = n)
+  df = data.frame("y" = rep(0,n), "x1" = x_values)
+  X = as.matrix(cbind("x0" = rep(1, n), "x1" = x_values ))
+  noise = rnorm(n, mean = 0, sd = sigma)   
+  y = X %*% B + noise
+  df[ , 1] = as.vector(y)
+  m = lm(y ~ x1, data = df)
+  pval = pf(q=summary(m)$fstatistic[1], df1 = length(coef(m)) - 1, df2 = n - length(coef(m)), lower.tail = FALSE)
+}
+
+simulate = function(n, beta, sigma, n_sim) {
+  power_vec = c(0, length(beta))
+  for (k in 1:length(beta)){
+    B = c(0, beta[k])
+    p_vec = rep(0, n_sim)
+  
+    for (i in 1:n_sim) {
+      p_vec[i] = get_pval(n, B, sigma)
+    }
+    
+    power_vec[k] = sum(p_vec < 0.05)/n_sim   #power = total Ho rejected/total simulations
+  }
+  power_vec
+}
+```
+
+```{r}
+p1 = simulate(n=10, beta, S[1], n_sim = 1000)
+p2 = simulate(n=20, beta, S[1], n_sim = 1000)
+p3 = simulate(n=30, beta, S[1], n_sim = 1000)
+
+p4 = simulate(n=10, beta, S[2], n_sim = 1000)
+p5 = simulate(n=20, beta, S[2], n_sim = 1000)
+p6 = simulate(n=30, beta, S[2], n_sim = 1000)
+
+p7 = simulate(n=10, beta, S[3], n_sim = 1000)
+p8 = simulate(n=20, beta, S[3], n_sim = 1000)
+p9 = simulate(n=30, beta, S[3], n_sim = 1000)
+
+```
+
+
+
+```{r}
+plot(p1 ~ beta)
+```
+
